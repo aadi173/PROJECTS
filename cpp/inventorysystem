@@ -1,0 +1,216 @@
+#include <iostream>
+#include <vector>
+#include <string>
+#include <map>
+#include <ctime>
+#include <iomanip>
+
+using namespace std;
+
+class Product {
+public:
+    int id;
+    string name;
+    double costPrice;
+    double sellingPrice;
+    int stock;
+
+    Product(int id, string name, double costPrice, double sellingPrice, int stock) 
+        : id(id), name(name), costPrice(costPrice), sellingPrice(sellingPrice), stock(stock) {}
+};
+
+class Inventory {
+private:
+    vector<Product> products;
+
+public:
+    void addProduct(int id, string name, double costPrice, double sellingPrice, int stock) {
+        products.push_back(Product(id, name, costPrice, sellingPrice, stock));
+    }
+
+    void updateProduct(int id, string name, double costPrice, double sellingPrice, int stock) {
+        for (auto &product : products) {
+            if (product.id == id) {
+                product.name = name;
+                product.costPrice = costPrice;
+                product.sellingPrice = sellingPrice;
+                product.stock = stock;
+                return;
+            }
+        }
+        cout << "Product not found!" << endl;
+    }
+
+    void deleteProduct(int id) {
+        for (size_t i = 0; i < products.size(); ++i) {
+            if (products[i].id == id) {
+                products.erase(products.begin() + i);
+                return;
+            }
+        }
+        cout << "Product not found!" << endl;
+    }
+
+    void showProducts() {
+        for (const auto &product : products) {
+            cout << "ID: " << product.id 
+                 << ", Name: " << product.name 
+                 << ", Cost Price: " << product.costPrice 
+                 << ", Selling Price: " << product.sellingPrice 
+                 << ", Stock: " << product.stock << endl;
+        }
+    }
+
+    Product* getProductById(int id) {
+        for (auto &product : products) {
+            if (product.id == id) {
+                return &product;
+            }
+        }
+        return nullptr;
+    }
+
+    void restockNotification(int threshold) {
+        for (const auto &product : products) {
+            if (product.stock < threshold) {
+                cout << "Low stock alert for Product ID: " << product.id 
+                     << ", Name: " << product.name << endl;
+            }
+        }
+    }
+};
+
+class SalesReport {
+private:
+    map<string, double> salesData;
+    double totalProfit = 0.0;
+    double totalLoss = 0.0;
+
+public:
+    void recordSale(const Product &product, int quantity) {
+        time_t now = time(0);
+        char* dt = ctime(&now);
+        string date(dt);
+        double totalSale = product.sellingPrice * quantity;
+        double profitOrLoss = (product.sellingPrice - product.costPrice) * quantity;
+        salesData[date] += totalSale;
+        totalProfit += max(profitOrLoss, 0.0);
+        totalLoss += max(-profitOrLoss, 0.0);
+    }
+
+    void generateReport() {
+        cout << "Sales Report: " << endl;
+        for (const auto &entry : salesData) {
+            cout << "Date: " << entry.first << " Total Sales: " << entry.second << endl;
+        }
+    }
+
+    void generateNetProfitLossReport() {
+        double netProfitLoss = totalProfit - totalLoss;
+        cout << "Net Profit/Loss: " << (netProfitLoss >= 0 ? "Profit: " : "Loss: ") 
+             << abs(netProfitLoss) << endl;
+    }
+};
+
+void barcodeScanner(Inventory &inventory, SalesReport &salesReport) {
+    int barcode, quantity;
+    cout << "Enter Product Barcode: ";
+    cin >> barcode;
+    Product *product = inventory.getProductById(barcode);
+    if (product) {
+        cout << "Enter Quantity: ";
+        cin >> quantity;
+        if (quantity <= product->stock) {
+            product->stock -= quantity;
+            salesReport.recordSale(*product, quantity);
+            cout << "Sale recorded for " << product->name << ", Quantity: " << quantity << endl;
+        } else {
+            cout << "Insufficient stock for " << product->name << endl;
+        }
+    } else {
+        cout << "Product not found!" << endl;
+    }
+}
+
+int main() {
+    Inventory inventory;
+    SalesReport salesReport;
+    int choice, id, stock;
+    string name;
+    double costPrice, sellingPrice;
+    
+    while (true) {
+        cout << "\nInventory Management System\n";
+        cout << "1. Add Product\n";
+        cout << "2. Update Product\n";
+        cout << "3. Delete Product\n";
+        cout << "4. Show Products\n";
+        cout << "5. Restock Notification\n";
+        cout << "6. Simulate Barcode Scanner\n";
+        cout << "7. Generate Sales Report\n";
+        cout << "8. Generate Net Profit/Loss Report\n";
+        cout << "9. Exit\n";
+        cout << "Enter your choice: ";
+        cin >> choice;
+
+        switch (choice) {
+            case 1:
+                cout << "Enter Product ID: ";
+                cin >> id;
+                cout << "Enter Product Name: ";
+                cin.ignore(); // Ignore leftover newline character
+                getline(cin, name);
+                cout << "Enter Cost Price: ";
+                cin >> costPrice;
+                cout << "Enter Selling Price: ";
+                cin >> sellingPrice;
+                cout << "Enter Product Stock: ";
+                cin >> stock;
+                inventory.addProduct(id, name, costPrice, sellingPrice, stock);
+                break;
+            case 2:
+                cout << "Enter Product ID: ";
+                cin >> id;
+                cout << "Enter New Product Name: ";
+                cin.ignore(); // Ignore leftover newline character
+                getline(cin, name);
+                cout << "Enter New Cost Price: ";
+                cin >> costPrice;
+                cout << "Enter New Selling Price: ";
+                cin >> sellingPrice;
+                cout << "Enter New Product Stock: ";
+                cin >> stock;
+                inventory.updateProduct(id, name, costPrice, sellingPrice, stock);
+                break;
+            case 3:
+                cout << "Enter Product ID to delete: ";
+                cin >> id;
+                inventory.deleteProduct(id);
+                break;
+            case 4:
+                inventory.showProducts();
+                break;
+            case 5:
+                cout << "Enter stock threshold for notifications: ";
+                cin >> stock;
+                inventory.restockNotification(stock);
+                break;
+            case 6:
+                barcodeScanner(inventory, salesReport);
+                break;
+            case 7:
+                salesReport.generateReport();
+                break;
+            case 8:
+                salesReport.generateNetProfitLossReport();
+                break;
+            case 9:
+                cout << "Exiting..." << endl;
+                return 0;
+            default:
+                cout << "Invalid choice!" << endl;
+        }
+    }
+    return 0;
+}
+
