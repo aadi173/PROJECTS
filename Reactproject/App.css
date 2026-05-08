@@ -1,0 +1,63 @@
+body{
+  background-color: lightgray;
+  font-family: Arial, sans-serif;
+}
+
+.container{
+  padding: 20px;
+}
+
+.card{
+  background-color: white;
+  padding: 20px;
+  margin-bottom: 20px;
+  border-radius: 10px;
+}
+
+.options {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.btn{
+  background-color: darkblue;
+  color: white;
+
+  border: none;
+  border-radius: 5px;
+
+ padding: 3px 12px;
+font-size: 18px;
+width: 250px;
+  cursor: pointer;
+  width: 250px;
+}
+
+.btn:hover{
+  background-color: #00008b;
+}
+
+.selected{
+  background-color: royalblue;
+}
+
+.result{
+  margin-top: 10px;
+}
+
+.correct{
+  color: green;
+  font-weight: bold;
+}
+
+.wrong{
+  color: red;
+  font-weight: bold;
+}
+
+.answer{
+  font-weight: bold;
+}
