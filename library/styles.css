@@ -1,0 +1,58 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+}
+
+.login-container {
+    display: flex;
+    height: 100vh; /* Full height of the viewport */
+}
+
+.image-section {
+    width: 60%; /* 60% of the screen width */
+    overflow: hidden; /* Prevents overflow */
+}
+
+.image-section img {
+    width: 100%; /* Makes the image responsive */
+    height: auto; /* Maintains aspect ratio */
+}
+
+.form-section {
+    width: 40%; /* 40% of the screen width */
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center the form vertically */
+    justify-content: center; /* Center the form horizontally */
+    padding: 20px;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    width: 100%; /* Full width of the form section */
+}
+
+label {
+    margin: 10px 0 5px;
+}
+
+input {
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+button {
+    padding: 10px;
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #0056b3;
+}

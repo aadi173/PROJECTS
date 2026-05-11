@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Library Management System</title>
+  <style>
+    body {
+      font-family: Arial;
+      font-size: 18px;
+      padding: 20px;
+      line-height: 1.6;
+      display: flex;
+      flex-direction: row;
+      gap: 20px;
+    }
+
+    .content {
+      flex: 1;
+    }
+
+    .image-container {
+      width: 45%;
+    }
+
+    .image-container img {
+      width: 100%;
+      height: auto;
+      border-radius: 10px;
+    }
+
+    .section {
+      margin-top: 30px;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    h2, h3 {
+      font-size: 24px;
+      color: rgb(0, 0, 255);
+    }
+
+    .user-summary {
+      font-size: 18px;
+    }
+
+    input, button {
+      font-size: 18px;
+    }
+
+    button {
+      padding: 10px 20px;
+      cursor: pointer;
+    }
+
+    textarea {
+      width: 100%;
+      height: 80px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th, td {
+      padding: 10px;
+      text-align: left;
+      border: 1px solid #ddd;
+    }
+
+    th {
+      background-color: #f2f2f2;
+      font-weight: bold;
+    }
+
+    td {
+      font-size: 18px;
+    }
+
+    .available-books label {
+      font-size: 18px;
+      color: black;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="image-container">
+    <img id="sideImage" src="img/overview.jpg" alt="Library Image" />
+  </div>
+
+  <div class="content">
+    <h2>Library Management System</h2>
+
+    <div class="section" id="setup">
+      <label>Enter number of users: </label>
+      <input type="number" id="totalUsers" min="1" />
+      <button onclick="start()">Start</button>
+    </div>
+
+    <div class="section hidden" id="rfidSection">
+      <h3>User <span id="userIndex">1</span> Login</h3>
+      <label>Enter RFID: </label><input id="rfidInput" /><br><br>
+      <label>Role (Admin/Student): </label><input id="roleInput" /><br><br>
+      <label>Semester (Even/Odd): </label><input id="semInput" /><br><br>
+      <label>Year: </label><input id="yearInput" /><br><br>
+      <label>Issue Date: </label><input type="date" id="issueDate" /><br><br>
+      <button onclick="proceed()">Continue</button>
+    </div>
+
+    <div class="section hidden" id="newArrivals">
+      <h3>New Arrivals</h3>
+      <ul id="arrivalsList">
+        <li>Quantum Technologies for Engineers</li>
+        <li>The Lord of the Rings</li>
+      </ul>
+      <div id="adminAdd" class="hidden">
+        <label>Add Book to New Arrivals: </label><input id="newBookInput" />
+        <button onclick="addNewArrival()">Add</button>
+      </div>
+    </div>
+
+    <div class="section hidden" id="libraryOptions">
+      <h3>Available Books</h3>
+      <div class="available-books">
+        <label><input type="checkbox" value="Quantum Technologies for Engineers" /> Quantum Technologies for Engineers</label><br>
+        <label><input type="checkbox" value="The Hunger Games" /> The Hunger Games</label><br>
+        <label><input type="checkbox" value="All the Light We Cannot See" /> All the Light We Cannot See</label><br>
+        <label><input type="checkbox" value="The illustrated theory of everything" /> The illustrated theory of everything</label><br>
+        <label><input type="checkbox" value="Malgudi Days" /> Malgudi Days</label><br>
+      </div>
+
+      <h3>Available Magazines</h3>
+      <label><input type="checkbox" value="WIRED" /> WIRED</label><br>
+      <label><input type="checkbox" value="PRATYOGITA DARPAN" /> PRATYOGITA DARPAN</label><br><br>
+
+      <button onclick="finishUser()">Finish User Input</button>
+    </div>
+
+    <!-- ✅ Updated summary with Continue button -->
+    <div class="section hidden" id="individualOutput">
+      <h3>User Summary</h3>
+      <div id="userSummary" class="user-summary"></div>
+      <button id="nextBtn" onclick="nextUser()">Continue to Next User</button>
+    </div>
+
+    <div class="section hidden" id="finalRecords">
+      <h2>Semester Issue Records</h2>
+      <table id="semesterRecordsTable">
+        <thead>
+          <tr>
+            <th>RFID</th>
+            <th>Role</th>
+            <th>Semester</th>
+            <th>Year</th>
+            <th>Books Issued</th>
+            <th>Magazines Issued</th>
+            <th>Issue Date</th>
+            <th>Due Date</th>
+          </tr>
+        </thead>
+        <tbody id="recordsOutput"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    let totalUsers = 0, currentUser = 0;
+    let users = [], newArrivals = ["Quantum Technologies for Engineers", "The Lord of the Rings"];
+
+    const imageInitial = "img/overview.jpg";
+    const imageLibrary = "img/mag.jpg";
+
+    document.getElementById("sideImage").src = imageInitial;
+
+    function start() {
+      totalUsers = parseInt(document.getElementById("totalUsers").value);
+      if (isNaN(totalUsers) || totalUsers <= 0) return alert("Enter valid number");
+
+      document.getElementById("setup").classList.add("hidden");
+      document.getElementById("rfidSection").classList.remove("hidden");
+      document.getElementById("sideImage").src = imageLibrary;
+    }
+
+    function proceed() {
+      const rfid = document.getElementById("rfidInput").value.trim();
+      const role = document.getElementById("roleInput").value.trim();
+      const sem = document.getElementById("semInput").value.trim().toLowerCase();
+      const year = document.getElementById("yearInput").value.trim();
+      const issueDateRaw = document.getElementById("issueDate").value;
+
+      if (!rfid || !role || !sem || !year || !issueDateRaw)
+        return alert("Please fill all fields");
+
+      if (sem !== "even" && sem !== "odd")
+        return alert("Please enter 'Even' or 'Odd' for semester");
+
+      const issueDate = formatDate(new Date(issueDateRaw));
+      const dueDate = getDueDate(issueDateRaw);
+
+      users[currentUser] = {
+        rfid, role, sem, year, issueDate,
+        dueDate,
+        books: [],
+        magazines: []
+      };
+
+      document.getElementById("rfidSection").classList.add("hidden");
+      document.getElementById("newArrivals").classList.remove("hidden");
+      document.getElementById("libraryOptions").classList.remove("hidden");
+
+      if (role.toLowerCase() === "admin") {
+        document.getElementById("adminAdd").classList.remove("hidden");
+      }
+    }
+
+    function getDueDate(issueDate) {
+      let date = new Date(issueDate);
+      date.setDate(date.getDate() + 14);
+      return formatDate(date);
+    }
+
+    function formatDate(date) {
+      let day = ("0" + date.getDate()).slice(-2);
+      let month = ("0" + (date.getMonth() + 1)).slice(-2);
+      let year = date.getFullYear();
+      return `${day}-${month}-${year}`;
+    }
+
+    function addNewArrival() {
+      let val = document.getElementById("newBookInput").value.trim();
+      if (!val) return;
+
+      newArrivals.push(val);
+      let ul = document.getElementById("arrivalsList");
+      let li = document.createElement("li");
+      li.innerText = val;
+      ul.appendChild(li);
+
+      let availableBooksSection = document.querySelector(".available-books");
+      let newBookLabel = document.createElement("label");
+      newBookLabel.style.fontSize = "18px";
+      newBookLabel.style.color = "black";
+
+      let newBookInput = document.createElement("input");
+      newBookInput.type = "checkbox";
+      newBookInput.value = val;
+
+      newBookLabel.appendChild(newBookInput);
+      newBookLabel.appendChild(document.createTextNode(` ${val}`));
+      availableBooksSection.appendChild(newBookLabel);
+      availableBooksSection.appendChild(document.createElement("br"));
+
+      document.getElementById("newBookInput").value = "";
+    }
+
+    function finishUser() {
+      let inputs = document.querySelectorAll("#libraryOptions input[type='checkbox']");
+      inputs.forEach(input => {
+        if (input.checked) {
+          if (["WIRED", "PRATYOGITA DARPAN"].includes(input.value)) {
+            users[currentUser].magazines.push(input.value);
+          } else {
+            users[currentUser].books.push(input.value);
+          }
+          input.checked = false;
+        }
+      });
+
+      let user = users[currentUser];
+      let summary = `
+        <p><strong>RFID:</strong> ${user.rfid}</p>
+        <p><strong>Role:</strong> ${user.role}</p>
+        <p><strong>Semester:</strong> ${user.sem}</p>
+        <p><strong>Year:</strong> ${user.year}</p>
+        <p><strong>Issue Date:</strong> ${user.issueDate}</p>
+        <p><strong>Due Date:</strong> ${user.dueDate}</p>
+        <p><strong>Books Issued:</strong> ${user.books.join(", ") || "None"}</p>
+        <p><strong>Magazines Issued:</strong> ${user.magazines.join(", ") || "None"}</p>
+      `;
+
+      document.getElementById("userSummary").innerHTML = summary;
+      document.getElementById("individualOutput").classList.remove("hidden");
+
+      // Hide input sections
+      document.getElementById("rfidSection").classList.add("hidden");
+      document.getElementById("newArrivals").classList.add("hidden");
+      document.getElementById("libraryOptions").classList.add("hidden");
+      document.getElementById("adminAdd").classList.add("hidden");
+
+      if (currentUser === totalUsers - 1) {
+        document.getElementById("nextBtn").innerText = "Show Final Records";
+      }
+    }
+
+    function nextUser() {
+      currentUser++;
+
+      if (currentUser < totalUsers) {
+        document.getElementById("rfidInput").value = "";
+        document.getElementById("roleInput").value = "";
+        document.getElementById("semInput").value = "";
+        document.getElementById("yearInput").value = "";
+        document.getElementById("issueDate").value = "";
+
+        document.getElementById("rfidSection").classList.remove("hidden");
+        document.getElementById("individualOutput").classList.add("hidden");
+        document.getElementById("userIndex").innerText = currentUser + 1;
+      } else {
+        document.getElementById("individualOutput").classList.add("hidden");
+        showFinalRecords();
+      }
+    }
+
+    function showFinalRecords() {
+      let tbody = document.getElementById("recordsOutput");
+      tbody.innerHTML = "";
+
+      users.forEach(user => {
+        let row = `
+          <tr>
+            <td>${user.rfid}</td>
+            <td>${user.role}</td>
+            <td>${user.sem}</td>
+            <td>${user.year}</td>
+            <td>${user.books.join(", ") || "None"}</td>
+            <td>${user.magazines.join(", ") || "None"}</td>
+            <td>${user.issueDate}</td>
+            <td>${user.dueDate}</td>
+          </tr>
+        `;
+        tbody.innerHTML += row;
+      });
+
+      document.getElementById("finalRecords").classList.remove("hidden");
+    }
+  </script>
+
+</body>
+</html>
