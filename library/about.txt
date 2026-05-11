@@ -1,0 +1,7 @@
+Library Management System
+
+Tech Stack: PHP, MySQL, HTML, CSS, JavaScript
+
+Developed a browser-based library management system with RFID-based login and role-based access control.
+Integrated MySQL database for authentication, transaction tracking, and CRUD operations.
+Designed responsive frontend interfaces for efficient library operations.
