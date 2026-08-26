@@ -1,0 +1,165 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Illegal Surface Mining Detection</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+<body>
+  <div class="wrapper d-flex">
+    <!-- Sidebar -->
+    <nav class="sidebar">
+      <h3 class="px-3 pt-3">Mining Detector</h3>
+      <ul class="nav flex-column">
+        <li class="nav-item">
+          <a class="nav-link active" href="#" id="nav-analyze">Analyze</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#" id="nav-dashboard">Dashboard</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#" id="nav-history">History</a>
+        </li>
+      </ul>
+    </nav>
+
+    <!-- Main content -->
+    <main class="main-content">
+      <!-- ANALYZE PAGE -->
+      <section id="page-analyze">
+        <h2>Image Analysis</h2>
+
+        <div class="card">
+          <div class="card-body">
+            <div class="upload-area">
+              <input type="file" id="file-input" accept="image/*" />
+              <button class="btn btn-primary mt-3" id="analyze-btn">Analyze Image</button>
+            </div>
+
+            <div id="result-loading" class="text-center mt-4" style="display:none;">
+              <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+              <p class="mt-2">Analyzing satellite image...</p>
+            </div>
+
+            <div id="result-panel" class="mt-4" style="display:none;">
+              <div class="d-flex align-items-center justify-content-between">
+                <div>
+                  <h5>Predicted Class</h5>
+                  <h3 id="result-class-val">-</h3>
+                </div>
+                <div>
+                  <span id="mining-badge" class="mining-badge">-</span>
+                </div>
+              </div>
+
+              <div class="row mt-4">
+                <div class="col-md-6">
+                  <h6>Confidence</h6>
+                  <p><strong id="top-conf">-</strong></p>
+                  <p><small>Inference time: <span id="inf-time">-</span></small></p>
+                  <p><small>Status: <span id="status-val">-</span></small></p>
+                </div>
+                <div class="col-md-6">
+                  <div class="chart-wrap">
+                    <canvas id="pieChart"></canvas>
+                  </div>
+                </div>
+              </div>
+
+              <h6 class="mt-4">Class-wise Confidence</h6>
+              <div id="confidence-bars"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- DASHBOARD PAGE -->
+      <section id="page-dashboard" style="display:none;">
+        <h2>Dashboard</h2>
+
+        <div class="row">
+          <div class="col-md-4">
+            <div class="card text-center">
+              <div class="card-body">
+                <h5>Total Images</h5>
+                <h3 id="dash-total">0</h3>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card text-center">
+              <div class="card-body">
+                <h5>Mining Detected</h5>
+                <h3 id="dash-mining" class="text-danger">0</h3>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card text-center">
+              <div class="card-body">
+                <h5>Safe Areas</h5>
+                <h3 id="dash-safe" class="text-success">0</h3>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row mt-4">
+          <div class="col-md-6">
+            <div class="card">
+              <div class="card-body">
+                <h5>Overall Mining vs Non‑Mining</h5>
+                <div class="chart-wrap">
+                  <canvas id="dash-pie"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="card">
+              <div class="card-body">
+                <h5>Recent Predictions (Mining %)</h5>
+                <div class="chart-wrap">
+                  <canvas id="dash-bar"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- HISTORY PAGE -->
+      <section id="page-history" style="display:none;">
+        <h2>History</h2>
+        <div class="card">
+          <div class="card-body">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Filename</th>
+                  <th>Class</th>
+                  <th>Confidence</th>
+                  <th>Status</th>
+                  <th>Time</th>
+                </tr>
+              </thead>
+              <tbody id="history-body">
+                <!-- Filled by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
